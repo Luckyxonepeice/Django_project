@@ -12,8 +12,8 @@ class UserInfo(models.Model):
 
 class EmailVerify(models.Model):
     
-    user_verify = models.ForeignKey(UserInfo,on_delete=models.CASCADE, null=True)
-    email_token = models.TextField(blank=False)
+    user_verify = models.ForeignKey(UserInfo,on_delete=models.CASCADE, null=True, related_name="verify")
+    email_token = models.IntegerField(blank=False)
     time_limit = models.DateField()
 
 

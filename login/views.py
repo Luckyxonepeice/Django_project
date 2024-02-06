@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response 
-from .models import UserInfo
-from .serializers import userInfoSerializer
-from django.contrib.auth.hashers import make_password
-
+from .models import UserInfo, EmailVerify
+from .serializers import userInfoSerializer, EmailVerifySerializer
+from .utils import otpGenerator
+from datetime import datetime
 class Login(APIView):
     
     
@@ -40,15 +40,31 @@ class Login(APIView):
         obj = userInfoSerializer(data=data)
         
         
-        
         if obj.is_valid(raise_exception=True):
             
             try:
-                obj.save()
+                
+                user_object=(obj.save())
+                
+                otp = otpGenerator(4)
+                
+                
+                try:
+                    
+                    
+                    Email_token = EmailVerify.objects.create(user_verify=user_object, email_token = otp ,
+                                                       time_limit= datetime.now())
+                    
+                except Exception as error:
+                    
+                    return Response(error, status=404)
+                         
+                
                 
             except Exception as error:
                 
-                return Response(obj.error_messages)
+                return Response(error)
             
-        
         return Response({"message:User Created"})
+    
+        
