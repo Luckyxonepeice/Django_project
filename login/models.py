@@ -1,5 +1,5 @@
 from django.db import models
-from django import forms 
+from datetime import datetime 
 class UserInfo(models.Model):
     
     first_name = models.CharField(blank=False,max_length=15)
@@ -14,6 +14,6 @@ class EmailVerify(models.Model):
     
     user_verify = models.ForeignKey(UserInfo,on_delete=models.CASCADE, null=True, related_name="verify")
     email_token = models.IntegerField(blank=False)
-    time_limit = models.DateField()
+    time_limit = models.DateTimeField(default=datetime.now())
 
 

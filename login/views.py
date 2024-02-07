@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response 
-from .models import UserInfo, EmailVerify
+from .models import UserInfo, EmailVerify as EmailCheck
 from .serializers import userInfoSerializer, EmailVerifySerializer
 from .utils import otpGenerator
 from datetime import datetime
@@ -48,23 +48,52 @@ class Login(APIView):
                 
                 otp = otpGenerator(4)
                 
+                dt = datetime.now()
                 
+                dt_str = dt.isoformat() 
                 try:
                     
-                    
-                    Email_token = EmailVerify.objects.create(user_verify=user_object, email_token = otp ,
-                                                       time_limit= datetime.now())
-                    
+                    Email_token = EmailCheck.objects.create(user_verify=user_object, email_token = otp,
+                                                            time_limit=dt_str)
+
                 except Exception as error:
                     
-                    return Response(error, status=404)
+                    return Response({"Error":str(error)}, status=404)
                          
                 
                 
             except Exception as error:
                 
-                return Response(error)
+                return Response({"Error":str(error)})
             
-        return Response({"message:User Created"})
+        return Response({"message":"User Created"})
     
+    
+
+class EmailVerify(APIView):
+    
+    def post(self, request , pk , format=None):
+        
+        otp = request.data
+        
+        user_obj = None
+        try:
+            
+            user_obj = UserInfo.objects.get(id=pk)
+            
+        except Exception as error:
+            
+            return Response({"Error":f"{error}"})
+        
+        try:
+            
+            email_obj = user_obj.verify.get(email_token=otp)
+        except Exception as error:
+            return Response({"Error":str(error)})
+                        
+        return Response({"Message!"})
+            
+            
+        
+        
         

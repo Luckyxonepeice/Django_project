@@ -9,7 +9,7 @@ class userInfoSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = UserInfo
-        fields = ['first_name','last_name','email','is_verified','password']
+        fields = ['id','first_name','last_name','email','is_verified','password']
         
         
     # def prev_otp(self , data):
@@ -52,6 +52,7 @@ class userInfoSerializer(serializers.ModelSerializer):
 class EmailVerifySerializer(serializers.ModelSerializer):
     
     user_verify = userInfoSerializer()
+   
     
     class Meta:
         model = EmailVerify 
