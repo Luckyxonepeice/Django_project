@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from .models import UserInfo, EmailVerify as EmailCheck
 from .serializers import userInfoSerializer, EmailVerifySerializer
 from .utils import otpGenerator
-from datetime import datetime
+from datetime import datetime,timedelta
 class Login(APIView):
     
     
@@ -74,24 +74,49 @@ class EmailVerify(APIView):
     
     def post(self, request , pk , format=None):
         
-        otp = request.data
+        data = request.data
         
-        user_obj = None
+        otp = data['token']
+        
+
         try:
             
             user_obj = UserInfo.objects.get(id=pk)
             
+            try:
+                email_obj = user_obj.verify.get(email_token=otp)
+                
+                #Validating Time Limit Of One Day
+                user_date = email_obj.time_limit.replace(tzinfo=None)
+                
+                Diff = datetime.now().replace(tzinfo=None)-user_date
+                
+                one_day = timedelta(days=1)
+                print(one_day)
+                if Diff>one_day:
+                    raise Exception("OTP validity Vanished!!")
+                
+                email_obj.delete()
+                
+                user_obj.is_verified=True
+                
+                user_obj.save()
+                
+            except EmailCheck.DoesNotExist:
+                
+                return Response({"Error":"Not Valid Token!"}, status=422)
+            
+            except Exception as error:
+                
+                return Response({"Error":str(error)})
+            
+                                            
         except Exception as error:
             
             return Response({"Error":f"{error}"})
         
-        try:
-            
-            email_obj = user_obj.verify.get(email_token=otp)
-        except Exception as error:
-            return Response({"Error":str(error)})
-                        
-        return Response({"Message!"})
+          
+        return Response({"Message":"SuccessFully Logged IN!"})
             
             
         
